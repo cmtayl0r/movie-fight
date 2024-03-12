@@ -1,0 +1,19 @@
+{
+    "name": "Movie Fight",
+    "version": "1.0.0",
+    "description": "Javascript project from the Javascript Bootcamp by Stephen Grider.",
+    "main": "index.js",
+    "scripts": {
+        "start": "parcel index.html",
+        "build": "parcel build index.html"
+    },
+    "keywords": [],
+    "author": "Christopher Taylor",
+    "license": "ISC",
+    "dependencies": {
+        "axios": "^1.6.7",
+        "bulma": "^0.9.4",
+        "remixicon": "^4.2.0"
+    },
+    "devDependencies": {}
+}
