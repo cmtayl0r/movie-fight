@@ -1,7 +1,8 @@
 // -----------------------------------------------------------------------------
-// Imports
+// IMPORTS
 // -----------------------------------------------------------------------------
 
+//
 import 'bulma/css/bulma.min.css';
 import 'remixicon/fonts/remixicon.css';
 import axios from 'axios';
@@ -9,20 +10,20 @@ import axios from 'axios';
 import { debounce } from './utils';
 
 // -----------------------------------------------------------------------------
-// DOM Elements
+// DOM ELEMENTS
 // -----------------------------------------------------------------------------
 
 const input = document.querySelector('input');
 
 // -----------------------------------------------------------------------------
-// Constants
+// CONSTANTS
 // -----------------------------------------------------------------------------
 
 const API_KEY = '5ff1336c';
 const API_URL = `http://www.omdbapi.com/`;
 
 // -----------------------------------------------------------------------------
-// Fetch API Data
+// AXIOS FETCH API
 // -----------------------------------------------------------------------------
 
 // Async function to fetch data from the API
@@ -34,21 +35,33 @@ const fetchData = async searchTerm => {
             s: searchTerm,
         },
     });
-    console.log(response.data);
+
+    return response.data.Search; // Return the `Search` array from the response data
 };
 
 // -----------------------------------------------------------------------------
-// Autocomplete
+// AUTOCOMPLETE INPUT
 // -----------------------------------------------------------------------------
 
-// 1 - DEBOUNCE FUNCTION (UTILS)
+// 1 - DEBOUNCE FUNCTION (utils.js)
 
 // 2 - FUNCTION TO BE DEBOUNCED (INPUT EVENT HANDLER)
 // The actual function to be called when the input event is triggered.
 // It will be debounced by the `debounce` function.
-// It calls the `fetchData` function with the value of the input field.
-const onInput = evt => {
-    fetchData(evt.target.value);
+const onInput = async evt => {
+    // Call the `fetchData` function with the value of the input field.
+    // we use await here to wait for the `fetchData` function to resolve before continuing.
+    const movies = await fetchData(evt.target.value);
+
+    // loop through the `movies` array and create a new `div` for each movie.
+    for (let movie of movies) {
+        const div = document.createElement('div');
+        div.innerHTML = `
+            <img src="${movie.Poster}" alt="${movie.Title} poster" />
+            <h5>${movie.Title}</h5>
+        `;
+        document.querySelector('#target').appendChild(div);
+    }
 };
 
 // 3 - EVENT LISTENER
