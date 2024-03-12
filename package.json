@@ -17,6 +17,7 @@
         "remixicon": "^4.2.0"
     },
     "devDependencies": {
+        "buffer": "^6.0.3",
         "parcel": "latest"
     }
 }

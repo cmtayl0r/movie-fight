@@ -4,6 +4,10 @@
     margin: auto;
 }
 
+h1 span.icon {
+    font-weight: 400;
+}
+
 figure.image {
     display: flex;
     justify-content: center;
