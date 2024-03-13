@@ -23,11 +23,14 @@ if (module.hot) {
 }
 
 // -----------------------------------------------------------------------------
-// MOVIE DETAILS
+// MOVIE DETAILS / SUMMARY
 // -----------------------------------------------------------------------------
 
+let leftMovie;
+let rightMovie;
+
 // Helper function to fetch the selected movie details
-export const onMovieSelect = async (movie, summaryEl) => {
+export const onMovieSelect = async (movie, summaryEl, side) => {
     const response = await axios.get(API_URL, {
         params: {
             apikey: API_KEY,
@@ -35,11 +38,56 @@ export const onMovieSelect = async (movie, summaryEl) => {
         },
     });
 
+    // Create the movie details template and set it to the specified left or right summary element
     summaryEl.innerHTML = movieTemplate(response.data);
+
+    // Set the movie details to the correct side
+    if (side === 'left') {
+        leftMovie = response.data;
+    } else {
+        rightMovie = response.data;
+    }
+    if (leftMovie && rightMovie) {
+        runComparison();
+    }
+};
+
+// Helper function to compare the selected movies
+const runComparison = () => {
+    const leftSideStats = document.querySelectorAll(
+        '#left-summary .notification'
+    );
+    const rightSideStats = document.querySelectorAll(
+        '#right-summary .notification'
+    );
 };
 
 // Helper function to create the movie details template
 const movieTemplate = movieDetail => {
+    // Parse the movie details to the correct data types
+    const dollars = parseInt(
+        // Remove the dollar sign and commas from the Box Office value
+        `${movieDetail.BoxOffice}`.replace(/\$/g, '').replace(/,/g, '')
+    );
+    const metascore = parseInt(movieDetail.Metascore);
+    const imdbRating = parseFloat(movieDetail.imdbRating);
+    const imdbVotes = parseInt(
+        //
+        `${movieDetail.imdbVotes}`.replace(/,/g, '').replace('N/A', '0')
+    );
+    const awards = movieDetail.Awards.split(' ').reduce((prev, word) => {
+        // Split the awards string into an array of words and reduce it to a single value
+        const value = parseInt(word);
+        // If the value is not a number, return the previous value
+        if (isNaN(value)) {
+            return prev;
+        } else {
+            // If the value is a number, add it to the previous value
+            return prev + value;
+        }
+    }, 0); // Start the reduce with a previous value of 0
+
+    // Return the movie details template
     return `
         <article class="media">
             <figure class="media-left">
@@ -55,7 +103,7 @@ const movieTemplate = movieDetail => {
                 </div>
             </div>
         </article>
-        <article class="notification is-primary">
+        <article class="notification is-primary" data-type="${awards}">
             <p class="title">${movieDetail.Awards}</p>
             <p class="subtitle">Awards</p>
         </article>
@@ -133,7 +181,10 @@ const init = function () {
             document.querySelector('.tutorial').classList.add('is-hidden');
             // Call the `onMovieSelect` function with the selected movie
             // Send the selected movie and the left summary element
-            onMovieSelect(movie, document.querySelector('#left-summary'));
+            onMovieSelect(
+                movie,
+                document.querySelector('#left-summary', 'left')
+            );
         },
     });
     createAutocomplete({
@@ -146,7 +197,10 @@ const init = function () {
             document.querySelector('.tutorial').classList.add('is-hidden');
             // Call the `onMovieSelect` function with the selected movie
             // Send the selected movie and the right summary element
-            onMovieSelect(movie, document.querySelector('#right-summary'));
+            onMovieSelect(
+                movie,
+                document.querySelector('#right-summary', 'right')
+            );
         },
     });
 };
