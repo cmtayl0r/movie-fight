@@ -43,23 +43,49 @@ export const onMovieSelect = async (movie, summaryEl, side) => {
 
     // Set the movie details to the correct side
     if (side === 'left') {
+        console.log('Left movie selected');
         leftMovie = response.data;
     } else {
+        console.log('Right movie selected');
         rightMovie = response.data;
     }
     if (leftMovie && rightMovie) {
+        console.log('Both movies have been selected');
+        // If both movies have been selected, run the comparison
         runComparison();
     }
 };
 
 // Helper function to compare the selected movies
 const runComparison = () => {
+    console.log('Comparing movies...');
     const leftSideStats = document.querySelectorAll(
         '#left-summary .notification'
     );
     const rightSideStats = document.querySelectorAll(
         '#right-summary .notification'
     );
+
+    if (leftMovie && rightMovie) {
+        // Compare the movie details and highlight the winning stats
+        // Loop through the left side stats and compare them to the right side stats
+        leftSideStats.forEach((leftStat, index) => {
+            // Get the right side stat at the same index
+            const rightStat = rightSideStats[index];
+            // Parse the values to integers
+            const leftValue = parseInt(leftStat.dataset.value);
+            const rightValue = parseInt(rightStat.dataset.value);
+            // If the right value is greater than the left value, add the `is-primary` class to the right stat
+            // else, add the `is-primary` class to the left stat
+            if (rightValue > leftValue) {
+                leftStat.classList.remove('is-primary');
+                leftStat.classList.add('is-warning');
+            } else {
+                rightStat.classList.remove('is-primary');
+                rightStat.classList.add('is-warning');
+            }
+        });
+    }
 };
 
 // Helper function to create the movie details template
@@ -105,23 +131,23 @@ const movieTemplate = movieDetail => {
                 </div>
             </div>
         </article>
-        <article class="notification is-primary" data-type="${awards}">
+        <article data-value="${awards}" class="notification is-primary" >
             <p class="title">${movieDetail.Awards}</p>
             <p class="subtitle">Awards</p>
         </article>
-        <article class="notification is-primary">
+        <article data-value="${dollars}" class="notification is-primary">
             <p class="title">${movieDetail.BoxOffice}</p>
             <p class="subtitle">Box Office</p>
         </article>
-        <article class="notification is-primary">
+        <article data-value="${metascore}" class="notification is-primary">
             <p class="title">${movieDetail.Metascore}</p>
             <p class="subtitle">Metascore</p>
         </article>
-        <article class="notification is-primary">
+        <article data-value="${imdbRating}" class="notification is-primary">
             <p class="title">${movieDetail.imdbRating}</p>
             <p class="subtitle">IMDB Rating</p>
         </article>
-        <article class="notification is-primary">
+        <article data-value="${imdbVotes}" class="notification is-primary">
             <p class="title">${movieDetail.imdbVotes}</p>
             <p class="subtitle">IMDB Votes</p>
         </article>
@@ -185,7 +211,8 @@ const init = function () {
             // Send the selected movie and the left summary element
             onMovieSelect(
                 movie,
-                document.querySelector('#left-summary', 'left')
+                document.querySelector('#left-summary'),
+                'left'
             );
         },
     });
@@ -201,7 +228,8 @@ const init = function () {
             // Send the selected movie and the right summary element
             onMovieSelect(
                 movie,
-                document.querySelector('#right-summary', 'right')
+                document.querySelector('#right-summary'),
+                'right'
             );
         },
     });
