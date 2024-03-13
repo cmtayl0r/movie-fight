@@ -9,6 +9,8 @@ import { debounce } from '../utils';
 // -----------------------------------------------------------------------------
 
 export const createAutocomplete = ({
+    // Destructure the arguments sent to the function by the config object
+    // so that we can use them as variables in the function body.
     root,
     renderOption,
     onOptionSelect,

@@ -109,11 +109,11 @@ const init = function () {
             return movie.Title;
         },
         async fetchData(searchTerm) {
+            // Fetch data from the API based on the search term
             try {
                 const response = await axios.get(API_URL, {
                     params: {
                         apikey: API_KEY,
-                        i: 'tt3896198',
                         s: searchTerm,
                     },
                 });
