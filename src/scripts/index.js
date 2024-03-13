@@ -77,9 +77,11 @@ const movieTemplate = movieDetail => {
     );
     const awards = movieDetail.Awards.split(' ').reduce((prev, word) => {
         // Split the awards string into an array of words and reduce it to a single value
+        // prev is the previous value, word is the current word
         const value = parseInt(word);
         // If the value is not a number, return the previous value
         if (isNaN(value)) {
+            // If the value is not a number, return the previous value
             return prev;
         } else {
             // If the value is a number, add it to the previous value
