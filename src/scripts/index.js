@@ -2,7 +2,7 @@
 // TODO: Show no results found on autocomplete
 // TODO: Add a loading spinner
 // TODO: Add a placeholder image for movies with no poster
-// TODO: Refactor the code to use a class-based approach, modules and MVC pattern
+// TODO: Refactor the code to use a class-based approach, modules and MVC pattern (?)
 
 // -----------------------------------------------------------------------------
 // IMPORTS
@@ -59,6 +59,8 @@ export const onMovieSelect = async (movie, summaryEl, side) => {
 // Helper function to compare the selected movies
 const runComparison = () => {
     console.log('Comparing movies...');
+    // Get the left and right side stats
+    // Get all the elements with the class `notification` inside the left and right summary elements
     const leftSideStats = document.querySelectorAll(
         '#left-summary .notification'
     );
