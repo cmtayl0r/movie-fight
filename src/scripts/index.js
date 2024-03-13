@@ -1,4 +1,8 @@
+// TODO: Create a refactoring branch
 // TODO: Show no results found on autocomplete
+// TODO: Add a loading spinner
+// TODO: Add a placeholder image for movies with no poster
+// TODO: Refactor the code to use a class-based approach, modules and MVC pattern
 
 // -----------------------------------------------------------------------------
 // IMPORTS
@@ -74,12 +78,25 @@ const fetchData = async searchTerm => {
 // 1 - DEBOUNCE FUNCTION (utils.js)
 
 // 2 - FUNCTION TO BE DEBOUNCED (INPUT EVENT HANDLER)
-// The actual function to be called when the input event is triggered.
+
+/**
+ * Fetches API data based on the search term and populates the dropdown with the results.
+ * @param {*} evt
+ * @returns A list of movies based on the search term
+ */
+// The function to be called when the input event is triggered.
 // It will be debounced by the `debounce` function.
+
 const onInput = async evt => {
     // Call the `fetchData` function with the value of the input field.
     // we use await here to wait for the `fetchData` function to resolve before continuing.
     const movies = await fetchData(evt.target.value);
+
+    // If there are no results, close the dropdown and exit the function early.
+    if (!movies.length) {
+        acDropdown.classList.remove('is-active');
+        return; // Exit the function early if there are no results
+    }
 
     // Clear the previous results
     acResultsWrapper.innerHTML = '';
@@ -96,6 +113,11 @@ const onInput = async evt => {
             <img src="${imgSRC}" alt="${movie.Title} poster" />
             ${movie.Title}
         `;
+        acOption.addEventListener('click', () => {
+            acDropdown.classList.remove('is-active'); // Close the dropdown
+            acInput.value = movie.Title; // Set the input value to the movie title
+            onMovieSelect(movie); // Call the `onMovieSelect` function with the selected movie
+        });
         acResultsWrapper.appendChild(acOption);
     }
 };
@@ -104,7 +126,6 @@ const onInput = async evt => {
 // The listener is set to respond to 'input' events, i.e., when the user types into the input field.
 // The `debounce` function is used here to wrap the `onInput` function, effectively debouncing it.
 // This means `onInput` will only be called 500 milliseconds after the user stops typing, reducing the frequency of potentially expensive `fetchData` calls
-// You could use this for other events, such as 'scroll' or 'resize', to limit the frequency of event handlers.
 acInput.addEventListener('input', debounce(onInput, 500));
 
 // Close the dropdown if the user clicks outside of it
@@ -114,3 +135,55 @@ document.addEventListener('click', evt => {
         acDropdown.classList.remove('is-active');
     }
 });
+
+// Helper function to fetch the selected movie details
+const onMovieSelect = async movie => {
+    const response = await axios.get(API_URL, {
+        params: {
+            apikey: API_KEY,
+            i: movie.imdbID,
+        },
+    });
+
+    document.querySelector('#summary').innerHTML = movieTemplate(response.data);
+};
+
+// Helper function to create the movie details template
+const movieTemplate = movieDetail => {
+    return `
+        <article class="media">
+            <figure class="media-left">
+                <p class="image">
+                    <img src="${movieDetail.Poster}" alt="${movieDetail.Title} poster" />
+                </p>
+            </figure>
+            <div class="media-content">
+                <div class="content">
+                    <h2>${movieDetail.Title}</h2>
+                    <h4>${movieDetail.Genre}</h4>
+                    <p>${movieDetail.Plot}</p>
+                </div>
+            </div>
+        </article>
+        <article class="notification is-primary">
+            <p class="title">${movieDetail.Awards}</p>
+            <p class="subtitle">Awards</p>
+        </article>
+        <article class="notification is-primary">
+            <p class="title">${movieDetail.BoxOffice}</p>
+            <p class="subtitle">Box Office</p>
+        </article>
+        <article class="notification is-primary">
+            <p class="title">${movieDetail.Metascore}</p>
+            <p class="subtitle">Metascore</p>
+        </article>
+        <article class="notification is-primary">
+            <p class="title">${movieDetail.imdbRating}</p>
+            <p class="subtitle">IMDB Rating</p>
+        </article>
+        <article class="notification is-primary">
+            <p class="title">${movieDetail.imdbVotes}</p>
+            <p class="subtitle">IMDB Votes</p>
+        </article>
+    `;
+};
