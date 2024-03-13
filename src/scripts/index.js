@@ -15,6 +15,7 @@ import axios from 'axios';
 
 import { API_KEY, API_URL } from './config';
 import { createAutocomplete } from './modules/autocomplete';
+import { placeholder } from './config';
 
 // Parcel
 if (module.hot) {
@@ -22,18 +23,11 @@ if (module.hot) {
 }
 
 // -----------------------------------------------------------------------------
-// AXIOS FETCH API
-// -----------------------------------------------------------------------------
-
-// Async function to fetch data from the API
-// export const fetchData = async
-
-// -----------------------------------------------------------------------------
 // MOVIE DETAILS
 // -----------------------------------------------------------------------------
 
 // Helper function to fetch the selected movie details
-export const onMovieSelect = async movie => {
+export const onMovieSelect = async (movie, summaryEl) => {
     const response = await axios.get(API_URL, {
         params: {
             apikey: API_KEY,
@@ -41,7 +35,7 @@ export const onMovieSelect = async movie => {
         },
     });
 
-    document.querySelector('#summary').innerHTML = movieTemplate(response.data);
+    summaryEl.innerHTML = movieTemplate(response.data);
 };
 
 // Helper function to create the movie details template
@@ -85,51 +79,74 @@ const movieTemplate = movieDetail => {
 };
 
 // -----------------------------------------------------------------------------
-// INITIALIZATION
+// AUTOCOMPLETE INITIALIZATION
 // -----------------------------------------------------------------------------
+
+const autocompleteConfig = {
+    // Unique config to send to the createAutocomplete function
+    // Can be used for multiple autocomplete components
+    renderOption(movie) {
+        const imgSRC = movie.Poster === 'N/A' ? placeholder : movie.Poster;
+        return `
+            <img src="${imgSRC}" alt="${movie.Title} poster" />
+            ${movie.Title} (${movie.Year})
+        `;
+    },
+    inputValue(movie) {
+        // Set the input value to the selected movie title
+        return movie.Title;
+    },
+    async fetchData(searchTerm) {
+        // Fetch data from the API based on the search term with async/await
+        try {
+            const response = await axios.get(API_URL, {
+                // params send a query string to the API with specific parameters
+                params: {
+                    apikey: API_KEY,
+                    s: searchTerm,
+                },
+            });
+
+            // FIXME: display no results found if this error occurs
+            // If there's an error, return an empty array
+            // This error occurs with this API when a search term is partially entered, problem of the API
+            if (response.data.Error) {
+                return [];
+            }
+
+            return response.data.Search; // Return the `Search` array from the response data
+        } catch (error) {
+            console.error('Error fetching data:', error.message);
+            throw error; // Rethrow the error to be handled by the caller
+        }
+    },
+};
 
 const init = function () {
     createAutocomplete({
-        // configuration object
-        // Unique config to send to the createAutocomplete function
-        root: document.querySelector('.autocomplete'),
-        renderOption(movie) {
-            const imgSRC = movie.Poster === 'N/A' ? placeholder : movie.Poster;
-            return `
-                <img src="${imgSRC}" alt="${movie.Title} poster" />
-                ${movie.Title} (${movie.Year})
-            `;
-        },
+        // make a copy of the `autocompleteConfig` object and add a new property
+        ...autocompleteConfig, // Spread the `autocompleteConfig` object
+        // Add a unique root property to the object
+        root: document.querySelector('#left-autocomplete'),
         onOptionSelect(movie) {
+            // Hide the tutorial when a movie is selected
+            document.querySelector('.tutorial').classList.add('is-hidden');
             // Call the `onMovieSelect` function with the selected movie
-            onMovieSelect(movie);
+            // Send the selected movie and the left summary element
+            onMovieSelect(movie, document.querySelector('#left-summary'));
         },
-        inputValue(movie) {
-            // Set the input value to the selected movie title
-            return movie.Title;
-        },
-        async fetchData(searchTerm) {
-            // Fetch data from the API based on the search term
-            try {
-                const response = await axios.get(API_URL, {
-                    params: {
-                        apikey: API_KEY,
-                        s: searchTerm,
-                    },
-                });
-
-                // FIXME: display no results found if this error occurs
-                // If there's an error, return an empty array
-                // This error occurs with this API when a search term is partially entered, problem of the API
-                if (response.data.Error) {
-                    return [];
-                }
-
-                return response.data.Search; // Return the `Search` array from the response data
-            } catch (error) {
-                console.error('Error fetching data:', error.message);
-                throw error; // Rethrow the error to be handled by the caller
-            }
+    });
+    createAutocomplete({
+        // make a copy of the `autocompleteConfig` object and add a new property
+        ...autocompleteConfig, // Spread the `autocompleteConfig` object
+        // Add a unique root property to the object
+        root: document.querySelector('#right-autocomplete'),
+        onOptionSelect(movie) {
+            // Hide the tutorial when a movie is selected
+            document.querySelector('.tutorial').classList.add('is-hidden');
+            // Call the `onMovieSelect` function with the selected movie
+            // Send the selected movie and the right summary element
+            onMovieSelect(movie, document.querySelector('#right-summary'));
         },
     });
 };
