@@ -68,7 +68,7 @@ const runComparison = () => {
         '#right-summary .notification'
     );
 
-    // if both movies have been selected
+    // if both movies have been selecteda
     if (leftMovie && rightMovie) {
         // Compare the movie details and highlight the winning stats
         // Loop through the left side stats and compare them to the right side stats
